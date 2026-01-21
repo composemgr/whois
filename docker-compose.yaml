@@ -1,0 +1,36 @@
+# nginx proxy address - http://172.17.0.1:62038
+
+name: whois
+x-logging: &default-logging
+  options:
+    max-size: '5m'
+    max-file: '1'
+  driver: json-file
+
+services:
+  app:
+    image: dumbwareio/dumbwhois:latest
+    container_name: whois-app
+    hostname: ${BASE_HOST_NAME:-$HOSTNAME}
+    restart: always
+    pull_policy: always
+    logging: *default-logging
+    environment:
+      TZ: ${TZ:-America/New_York}
+      CONTAINER_NAME: whois-app
+      HOSTNAME: ${BASE_HOST_NAME:-$HOSTNAME}
+      SITE_TITLE: ${DUMBWHOIS_SITE_TITLE:-DumbWhois}
+      ALLOWED_ORIGINS: ${DUMBWHOIS_ALLOWED_ORIGINS:-*}
+    ports:
+      - '172.17.0.1:62038:3000'
+    volumes:
+      - './rootfs/data:/data:z'
+      - './rootfs/config:/config:z'
+    networks:
+      - whois
+
+networks:
+  whois:
+    name: whois
+    external: false
+
