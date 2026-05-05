@@ -24,8 +24,8 @@ services:
     ports:
       - '172.17.0.1:62038:3000'
     volumes:
-      - './rootfs/data:/data:z'
-      - './rootfs/config:/config:z'
+      - './volumes/data:/data:z'
+      - './volumes/config:/config:z'
     networks:
       - whois
 
