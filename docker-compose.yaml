@@ -28,9 +28,30 @@ services:
       - './volumes/config:/config:z'
     networks:
       - whois
+      - proxy
+      - cloudflare
+    labels:
+      - 'traefik.enable=true'
+      - 'cloudflare.enable=true'
+      - 'traefik.docker.network=proxy'
+      - 'cloudflare.service=http://whois-app:3000'
+      - 'cloudflare.hostname=whois.${CLOUDFLARE_ZONE_NAME:-}'
+      - 'traefik.http.routers.whois-app.entrypoints=http'
+      - 'traefik.http.routers.whois-app-secure.tls=true'
+      - 'traefik.http.routers.whois-app.rule=Host($(${BASE_HOST_NAME:-$HOSTNAME}))'
+      - 'traefik.http.middlewares.whois-app-https-redirect.redirectscheme.scheme=https'
+      - 'traefik.http.routers.whois-app.middlewares=whois-app-https-redirect'
+      - 'traefik.http.routers.whois-app-secure.entrypoints=https'
+      - 'traefik.http.routers.whois-app-secure.rule=Host($(${BASE_HOST_NAME:-$HOSTNAME}))'
+      - 'traefik.http.routers.whois-app-secure.tls.certresolver=cloudflare'
+      - 'traefik.http.routers.whois-app-secure.service=whois-app'
+      - 'traefik.http.services.whois-app.loadbalancer.server.port=3000'
 
 networks:
   whois:
     name: whois
     external: false
-
+  proxy:
+    external: true
+  cloudflare:
+    external: true
