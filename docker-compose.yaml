@@ -23,9 +23,6 @@ services:
       ALLOWED_ORIGINS: ${DUMBWHOIS_ALLOWED_ORIGINS:-*}
     ports:
       - '172.17.0.1:62038:3000'
-    volumes:
-      - './volumes/data:/data:z'
-      - './volumes/config:/config:z'
     networks:
       - whois
       - proxy
