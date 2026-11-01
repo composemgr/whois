@@ -1,4 +1,4 @@
-# nginx proxy address - http://172.17.0.1:62038
+# nginx proxy address - http://172.17.0.1:64386
 
 name: whois
 x-logging: &default-logging
@@ -11,6 +11,7 @@ services:
   app:
     image: dumbwareio/dumbwhois:latest
     container_name: whois-app
+    domainname: ${BASE_DOMAIN_NAME:-example.com}
     hostname: ${BASE_HOST_NAME:-$HOSTNAME}
     restart: always
     pull_policy: always
@@ -19,36 +20,14 @@ services:
       TZ: ${TZ:-America/New_York}
       CONTAINER_NAME: whois-app
       HOSTNAME: ${BASE_HOST_NAME:-$HOSTNAME}
-      SITE_TITLE: ${DUMBWHOIS_SITE_TITLE:-DumbWhois}
-      ALLOWED_ORIGINS: ${DUMBWHOIS_ALLOWED_ORIGINS:-*}
+      DUMBWHOIS_SITE_TITLE: ${APP_ORG_NAME:-DumbWhois}
+      DUMBWHOIS_ALLOWED_ORIGINS: ${DUMBWHOIS_ALLOWED_ORIGINS:-*}
     ports:
-      - '172.17.0.1:62038:3000'
+      - '172.17.0.1:64386:3000'
     networks:
       - whois
-      - proxy
-      - cloudflare
-    labels:
-      - 'traefik.enable=true'
-      - 'cloudflare.enable=true'
-      - 'traefik.docker.network=proxy'
-      - 'cloudflare.service=http://whois-app:3000'
-      - 'cloudflare.hostname=whois.${CLOUDFLARE_ZONE_NAME:-}'
-      - 'traefik.http.routers.whois-app.entrypoints=http'
-      - 'traefik.http.routers.whois-app-secure.tls=true'
-      - 'traefik.http.routers.whois-app.rule=Host($(${BASE_HOST_NAME:-$HOSTNAME}))'
-      - 'traefik.http.middlewares.whois-app-https-redirect.redirectscheme.scheme=https'
-      - 'traefik.http.routers.whois-app.middlewares=whois-app-https-redirect'
-      - 'traefik.http.routers.whois-app-secure.entrypoints=https'
-      - 'traefik.http.routers.whois-app-secure.rule=Host($(${BASE_HOST_NAME:-$HOSTNAME}))'
-      - 'traefik.http.routers.whois-app-secure.tls.certresolver=cloudflare'
-      - 'traefik.http.routers.whois-app-secure.service=whois-app'
-      - 'traefik.http.services.whois-app.loadbalancer.server.port=3000'
 
 networks:
   whois:
     name: whois
     external: false
-  proxy:
-    external: true
-  cloudflare:
-    external: true
