@@ -20,6 +20,12 @@ services:
       HOSTNAME: ${BASE_HOST_NAME:-$HOSTNAME}
       DUMBWHOIS_SITE_TITLE: ${APP_ORG_NAME:-DumbWhois}
       DUMBWHOIS_ALLOWED_ORIGINS: ${DUMBWHOIS_ALLOWED_ORIGINS:-*}
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -qO- http://localhost:3000/health || exit 1']
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
     labels:
       - 'cloudflare.enable=true'
       - 'cloudflare.service=http://whois-app:3000'
